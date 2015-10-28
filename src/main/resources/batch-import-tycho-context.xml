@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+	http://www.springframework.org/schema/batch
+	http://www.springframework.org/schema/batch/spring-batch-3.0.xsd
+	http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<bean id="inputFile" class="org.springframework.core.io.FileSystemResource">
+		<constructor-arg value="C:\Users\Nico\astro_atlas\tycho2\CATALOG.DAT" type="java.lang.String"/>
+	</bean>
+
+	<bean id="starReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+		<property name="resource" ref="inputFile" />
+		<property name="lineMapper">
+			<bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+				<property name="lineTokenizer">
+					<bean class="org.springframework.batch.item.file.transform.FixedLengthTokenizer">
+						<property name="columns" value="1-4,6-10,12-12,14-14,16-27,29-49,111-116,124-129,143-151"/>
+						<property name="strict" value="false" />
+					</bean>
+				</property>
+				<property name="fieldSetMapper">
+					<bean class="com.nzv.batch.importer.tycho.StarFieldSetMapper" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="starProcessor" class="com.nzv.batch.importer.tycho.StarProcessor" />
+
+	<bean id="starWriter" class="com.nzv.batch.importer.tycho.StarDatabaseWriter">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+<!-- 	<bean id="starRedisWriter" class="com.nzv.batch.importer.tycho.StarRedisWriter"> -->
+<!-- 		<property name="redisTemplate" ref="redisRemplate" /> -->
+<!-- 	</bean> -->
+	
+<!-- 	<bean id="jedisConnFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"  -->
+<!--     p:use-pool="true"/> -->
+
+<!-- 	<bean id="redisTemplate"  class="org.springframework.data.redis.core.RedisTemplate"  -->
+<!--     p:connection-factory-ref="jedisConnFactory"/> -->
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost/dsocatalog" />
+		<property name="username" value="root" />
+		<property name="password" value="password" />
+	</bean>
+
+	<bean id="jobLauncher"
+		class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+		<property name="jobRepository" ref="jobRepository" />
+	</bean>
+
+	<bean id="jobRepository"
+		class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+		<property name="transactionManager" ref="transactionManager" />
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="10" />
+		<property name="maxPoolSize" value="40" />
+	</bean>
+
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<job id="importTychoCatalog" xmlns="http://www.springframework.org/schema/batch">
+		<step id="readWriteTychoCatalog">
+			<tasklet>
+				<chunk reader="starReader" processor="starProcessor"
+					writer="starWriter" commit-interval="500" />
+			</tasklet>
+		</step>
+	</job>
+
+</beans>

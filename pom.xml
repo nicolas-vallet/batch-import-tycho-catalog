@@ -1,0 +1,78 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.nzv.batch</groupId>
+	<artifactId>tycho-importer</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<description>
+		A Spring batch for importing the 2.5 million stars of the Tycho 2 catalog
+		into a MySQL database
+	</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<spring.version>3.2.4.RELEASE</spring.version>
+		<spring-batch.version>3.0.5.RELEASE</spring-batch.version>
+		<mysql.version>5.1.6</mysql.version>
+		<spring-data-redis.version>1.6.0.RELEASE</spring-data-redis.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-core</artifactId>
+			<version>${spring-batch.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-infrastructure</artifactId>
+			<version>${spring-batch.version}</version>
+		</dependency>
+		<dependency>
+		 	<groupId>org.springframework</groupId>
+		 	<artifactId>spring-aop</artifactId>
+		 	<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+		 	<groupId>org.springframework</groupId>
+		 	<artifactId>spring-jdbc</artifactId>
+		 	<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+	        <groupId>org.springframework.data</groupId>
+	        <artifactId>spring-data-redis</artifactId>
+	        <version>${spring-data-redis.version}</version>
+	    </dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.java</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
