@@ -5,8 +5,10 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
 						http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
 
+    <bean id="catalogImportFile" class="org.springframework.core.io.FileSystemResource" c:path="#{stepExecutionContext['importFile']}" scope="step" />
+
 	<bean id="starReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
-		<property name="resource" value="#{stepExecutionContext['importFile']}" />
+		<property name="resource" ref="catalogImportFile" />
 		<property name="lineMapper">
 			<bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
 				<property name="lineTokenizer">
@@ -28,7 +30,7 @@
 	</bean>
 	
 	<batch:step id="catalogPartitionImportStep">
-		<batch:tasklet task-executor="threadPoolTaskExecutor">
+		<batch:tasklet>
 			<batch:chunk reader="starReader" writer="starWriter" commit-interval="250" />
 		</batch:tasklet>
 	</batch:step>

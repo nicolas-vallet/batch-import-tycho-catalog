@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,12 +22,13 @@ public class CatalogImportPartitioner implements Partitioner {
 		File importDirectory = new File(catalogImoprtDirectory);
 		
 		if (importDirectory != null && importDirectory.exists()) {
-		
+			
 			ExecutionContext partitionExecutionContext;
 			
 			for (String importFile : importDirectory.list()) {
 				partitionExecutionContext = new ExecutionContext();
-				partitionExecutionContext.put("importFile", new FileSystemResource(importFile));
+				partitionExecutionContext.put("importFile", catalogImoprtDirectory + importFile);
+				partitions.put(importFile + "_partition", partitionExecutionContext);
 			}
 		}
 		
