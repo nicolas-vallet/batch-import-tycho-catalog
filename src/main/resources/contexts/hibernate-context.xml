@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.2.xsd
+						http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan" value="com.nzv" />
+		<property name="hibernateProperties" ref="hibernateProperties" />
+	</bean>
+
+	<util:properties id="hibernateProperties">
+		<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+		<prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+		<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+		<prop key="hibernate.hbm2ddl.auto">create</prop>
+		<prop key="hibernate.connection.autocommit">true</prop>
+		<prop key="hibernate.connection.charSet">UTF-8</prop>
+		<prop key="hibernate.connection.useUnicode">true</prop>
+		<prop key="hibernate.connection.characterEncoding">UTF-8</prop>
+	</util:properties>
+
+	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+	
+</beans>

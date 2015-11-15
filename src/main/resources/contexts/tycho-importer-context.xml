@@ -28,7 +28,7 @@
 	</bean>
 	
 	<batch:step id="catalogPartitionImportStep">
-		<batch:tasklet>
+		<batch:tasklet task-executor="threadPoolTaskExecutor">
 			<batch:chunk reader="starReader" writer="starWriter" commit-interval="250" />
 		</batch:tasklet>
 	</batch:step>
