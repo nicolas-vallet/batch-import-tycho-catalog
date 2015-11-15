@@ -13,7 +13,7 @@
 	<artifactId>tycho-importer</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 
-	<description>A Spring batch for importing the 2.5 million stars of the Tycho 2 catalog into a MySQL database</description>
+	<description>A Spring batch for importing the 2.5 million stars of the Tycho 2 catalog into database</description>
 
 	<dependencies>
 
