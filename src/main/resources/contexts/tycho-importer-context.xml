@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:c="http://www.springframework.org/schema/c" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:batch="http://www.springframework.org/schema/batch"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+						http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
+
+	<bean id="starReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+		<property name="resource" value="#{stepExecutionContext['importFile']}" />
+		<property name="lineMapper">
+			<bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+				<property name="lineTokenizer">
+					<bean class="org.springframework.batch.item.file.transform.FixedLengthTokenizer">
+						<property name="columns" value="1-4,6-10,12-12,14-14,16-27,29-40,111-116,124-129,143-151"/>
+						<property name="strict" value="false" />
+					</bean>
+				</property>
+				<property name="fieldSetMapper" ref="starFieldSetMapper" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="starWriter" class="org.springframework.batch.item.database.HibernateItemWriter" p:sessionFactory-ref="sessionFactory" scope="step" />
+
+	<bean id="catalogImportPartitionHandler" class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler" p:taskExecutor-ref="threadPoolTaskExecutor">
+		<property name="step" ref="catalogPartitionImportStep" />
+		<property name="gridSize" value="${catalog_import_threads}" />
+	</bean>
+	
+	<batch:step id="catalogPartitionImportStep">
+		<batch:tasklet>
+			<batch:chunk reader="starReader" writer="starWriter" commit-interval="250" />
+		</batch:tasklet>
+	</batch:step>
+
+	<batch:job id="catalogImportJob">
+		<batch:step id="catalogImportStep">
+			<batch:partition partitioner="catalogImportPartitioner" handler="catalogImportPartitionHandler" />
+		</batch:step>
+	</batch:job>
+	
+	<bean id="threadPoolTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor" p:corePoolSize="4" p:maxPoolSize="40" />
+	
+	<bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher" p:jobRepository-ref="jobRepository" />
+
+	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean" p:transactionManager-ref="transactionManager" />
+	
+</beans>
